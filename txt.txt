@@ -1,0 +1,41 @@
+Stack with: 
+1) RDS table 
+2) 3 lambdas that interat with this table
+-  1 lambda gets triggered when the rds instace is initialized
+
+Block 1 
+1) create Vpc 
+- vpcName: 'rds-vpc' 
+- maxAzs:       2, 
+- natGateways:  0, 
+- subnetConfiguration: [{subnetType: SubnetType.PRIVATE_ISOLATED, cidrMask: 24, name: 'rds'}]
+
+2) create 2 Security Groups 
+-  securityGroupName: 'resolvers-sg', description: 'Security Group with Resolvers'
+-  securityGroupName: 'rds-sg', description: 'Security Group with RDS'
+
+3) create Ingres rule so SG of the Lambdas can access the SG of the Rds         X
+-  Port.tcp(5432), 'Allow inbound traffic to RDS'
+
+4) create interface for the Lambdas and the Secrets Manager                     X
+-  'LAMBDA', { service: InterfaceVpcEndpointAwsService.LAMBDA,
+               subnets: { subnets: vpc.isolatedSubnets },
+               securityGroups: [securityGroupResolvers],
+             }
+-  'SECRETS_MANAGER', {
+      service: InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
+      subnets: { subnets: vpc.isolatedSubnets },
+      securityGroups: [securityGroupResolvers],
+    }
+
+Block 2 
+5) cretate role with assumpted by
+6) add permissions to role 
+
+Block 3 
+7) create rds instance 
+8) get the "secret" from the Secrets Manager (inside the handler we get the real secret)
+9) create functions for creating lambdas 
+10) create lambdas and add CustomResource to the 'instantiate' lambda 
+11) add the addDependency
+
